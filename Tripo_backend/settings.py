@@ -28,6 +28,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# Time zone
+USE_TZ = False
 
 # Application definition
 
