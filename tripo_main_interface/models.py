@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.utils import timezone
 import image_manager.models
 
 
@@ -18,6 +18,6 @@ class Posts(models.Model):
     user = models.ForeignKey('Users', on_delete=True, related_name='posts')   # user who posts
     title = models.TextField(default='unnamed post')    # title of the post
     content = models.TextField(default='')  # content of the post
-    time = models.TimeField()   # post time, local time
+    time = models.TimeField(default=timezone.now())   # post time, local time
     location = models.TextField(default='')     # location, generated & resolved in front end
     # images, foreign key related name
