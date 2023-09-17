@@ -1,12 +1,13 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import AbstractUser
 import image_manager.models
 
 
 # Create your models here.
 
-class Users(models.Model):
-    uid = models.AutoField(primary_key=True)    # primary key, uid, unique identifier in back end
+class Users(AbstractUser):
+    id = models.AutoField(primary_key=True)    # primary key, uid, unique identifier in back end
     username = models.TextField(default='unnamed user')     # username
     password = models.TextField(default='')     # password, ought to be encrypted in front end
     email = models.TextField(default='')    # email, format should be checked before stored
