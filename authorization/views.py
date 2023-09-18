@@ -43,7 +43,7 @@ class verification(APIView):  # send verification code
         # do something
         content = "Your have requested verification code of Tripo, your code is \n" +  \
                   "<h2>" + str(code) + "</h2>\n" + \
-                  "This code can be used to register and reset password, <b> DO NOT DISTRIBUTE </b> to others. " + \
+                  "This code can be used to register and reset password, <b> DO NOT DISTRIBUTE </b> to others. <br>" + \
                   "<right> Tripo Team </right>"
         send_mail(email, 'Tripo Verification Code', content)
 
