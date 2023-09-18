@@ -19,6 +19,7 @@ from django.urls import path
 import authorization.views
 from authorization import views as auth_views
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
+from tripo_main_interface import views as main_views
 
 urlpatterns = [
     #    path("admin/", admin.site.urls),
@@ -28,5 +29,6 @@ urlpatterns = [
     path('api/token/', authorization.views.MyObtainTokenPairView.as_view(), name='token_obtain_pair'),
     path('api/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    path('get_user_info/', main_views.get_user_info.as_view(), name='get_user_info'),
 
 ]
