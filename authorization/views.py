@@ -69,7 +69,7 @@ class register(APIView):
             user = None
         if user is not None:    # email used
             return HttpResponse(status=301)
-        Users.objects.create(username=username, password=password, email=email)
+        Users.objects.create_user(username=username, password=password, email=email)
         return HttpResponse(status=200)
 
 class reset(APIView):
@@ -85,7 +85,7 @@ class reset(APIView):
             user = Users.objects.get(email=email)
         except Users.DoesNotExist:
             return HttpResponse(status=404)
-        user.password = password
+        user.set_password(password)
         user.save()
         return HttpResponse(status=200)
 
@@ -94,7 +94,7 @@ class MyCustomBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
         try:
             user = Users.objects.get(email=username)
-            if user.password == password:
+            if user.check_password(password):
                 return user
         except Exception as e:
             return None
