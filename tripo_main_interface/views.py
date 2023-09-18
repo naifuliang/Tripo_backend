@@ -32,3 +32,17 @@ class get_user_info(APIView):
             "avatar": user.avatar.url if user.avatar else None
         }
         return JsonResponse(res)
+
+class set_user_info(APIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request):
+        user = request.user
+        user_info = json.loads(request.body)
+        username = user_info.get('username')
+        email = user_info.get('email')
+        if username is not None:
+            user.username = username
+        if email is not None:
+            user.email = email
+        user.save()
+        return HttpResponse(status=200)
