@@ -20,6 +20,7 @@ import authorization.views
 from authorization import views as auth_views
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 from tripo_main_interface import views as main_views
+from image_manager import views as img_views
 
 urlpatterns = [
     #    path("admin/", admin.site.urls),
@@ -36,4 +37,6 @@ urlpatterns = [
     path('set_post_info/', main_views.set_post_info.as_view(), name='set_post_info'),
     path('delete_post_info/', main_views.delete_post_info.as_view(), name='delete_post_info'),
     path('get_chat_response/', main_views.get_chat_response.as_view(), name='get_chat_response'),
+    path('push_img/', img_views.push_img.as_view(), name='push_img'),
+    path('delete_img/', img_views.delete_img.as_view(), name='delete_img'),
 ]
