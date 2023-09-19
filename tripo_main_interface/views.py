@@ -46,3 +46,110 @@ class set_user_info(APIView):
             user.email = email
         user.save()
         return HttpResponse(status=200)
+    
+    
+# get a existing post from the database
+class get_post_info(APIView):
+    def get(self, request):
+        # get the post in the database 
+        if 'post_id' in request.GET:
+            post_id = request.GET['post_id']
+            try:
+                post = Posts.objects.get(post_id=post_id)
+            except Posts.DoesNotExist:
+                post = None
+        else:
+            return HttpResponse(status=500)
+        
+        # return the post information from database
+        res = {
+            "post_id": post.post_id,
+            "username": post.user.username,
+            "email": post.user.email,
+            "avatar": post.user.avatar.url if post.user.avatar else None,
+            "title": post.title,
+            "content": post.content, 
+            "time":post.time,
+            "location":post.location
+        }
+        return JsonResponse(res)
+
+# update a existing post in the database
+class set_post_info(APIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request):
+        # get post's info and user's info from request body
+        user = request.user                                        
+        post_info = request.POST                                   
+        post_id = post_info.get('post_id')
+        title = post_info.get('title')
+        content = post_info.get('content')
+        location = post_info.get('location')
+        time = post_info.get('time')
+        
+        # try to get the post
+        try:                                            # if the post exists
+            post = Posts.objects.get(post_id=post_id)   # get the post
+        except Posts.DoesNotExist:                      # if not exists
+            return HttpResponse(status=404)             # 404 not found
+        
+        # if new information exist, update the post
+        if post_id is not None:                        
+            post.post_id = post_id
+        if user is not None:
+            post.user = user
+        if title is not None:
+            post.title = title
+        if content is not None:
+            post.content = content
+        if time is not None:
+            post.time = time
+        if location is not None:
+            post.location = location
+            
+        post.save()                                  # save the new post
+        return HttpResponse(status=200)              # 200 OK
+    
+# add a new post to the database
+class push_post_info(APIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request):
+        user = request.user                                        # get post info from request body
+        post_info = request.POST                                   
+        post_id = post_info.get('post_id')
+        title = post_info.get('title')
+        content = post_info.get('content')
+        location = post_info.get('location')
+        time = post_info.get('time')
+        
+        post_check_item = Posts.objects.filter(post_id = post_id)  # try to get the post
+        
+        if post_check_item.exists():                               # if the post already exists
+            return HttpResponse(status=403)                        # 403 forbidden
+        else:                                                      # if not exist
+            post = Posts(post_id=post_id,\
+                            user=user,\
+                                title=title,\
+                                    content=content,\
+                                        time=time,\
+                                            location=location)     # create a new post
+            post.save()                                            # save the new post
+        return HttpResponse(status=200)                            # 200 OK
+    
+
+# delete a existing post from the database
+class delete_post_info(APIView):
+    permission_classes = (IsAuthenticated,)
+    def delete(self, request):
+        # get post info and user info from request body
+        user = request.user
+        post_info = request.POST                    
+        post_id = post_info.get('post_id')
+        post = Posts.objects.filter(post_id=post_id,user=user) 
+        
+        if post.exists():                            # if the post already exists
+            post.delete()                            # delete the post
+            return HttpResponse(status=200)          # return HTTP 200
+        else:                                        # if not exists
+           return HttpResponse(status=404)           # return HTTP 404
+        

@@ -31,5 +31,8 @@ urlpatterns = [
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('get_user_info/', main_views.get_user_info.as_view(), name='get_user_info'),
     path('set_user_info/', main_views.set_user_info.as_view(), name='set_user_info'),
-
+    path('get_post_info/', main_views.get_post_info.as_view(), name='get_post_info'),
+    path('push_post_info/', main_views.push_post_info.as_view(), name='push_post_info'),
+    path('set_post_info/', main_views.set_post_info.as_view(), name='set_post_info'),
+    path('delete_post_info/', main_views.delete_post_info.as_view(), name='delete_post_info'),
 ]
