@@ -35,4 +35,5 @@ urlpatterns = [
     path('push_post_info/', main_views.push_post_info.as_view(), name='push_post_info'),
     path('set_post_info/', main_views.set_post_info.as_view(), name='set_post_info'),
     path('delete_post_info/', main_views.delete_post_info.as_view(), name='delete_post_info'),
+    path('get_chat_response/', main_views.get_chat_response.as_view(), name='get_chat_response'),
 ]

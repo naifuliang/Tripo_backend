@@ -10,12 +10,13 @@ from rest_framework import authentication, permissions
 from django.http import HttpResponse, JsonResponse
 from tripo_main_interface.models import Users, Posts
 from django.contrib.auth.models import AnonymousUser
-
+from .utils import get_access_token
+import requests
 # Create your views here.
 
 class get_user_info(APIView):
     # authentication_classes = (SessionAuthentication, BasicAuthentication)
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     def get(self, request):
         if 'uid' in request.GET:
             uid = request.GET['uid']
@@ -153,3 +154,33 @@ class delete_post_info(APIView):
         else:                                        # if not exists
            return HttpResponse(status=404)           # return HTTP 404
         
+
+# get the AI LLM chat response from baidu company
+class get_chat_response(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self, request):
+        # get the chat info from request
+        chat_query = request.GET.get('chat_info')   # 输入需要LLM大模型处理的介绍内容，比如某海滩某山脉的名字
+        
+        if chat_query is None:
+            return HttpResponse(status=500)
+        
+        url = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/eb-instant?access_token=" + get_access_token() # get the access token from baidu company
+
+        payload = json.dumps({
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "假设你是一名资深导游，请为游客们简要介绍一下{}".format(chat_query)
+                }
+            ]
+        })
+        
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        
+        response = requests.request("POST", url, headers=headers, data=payload)
+        
+        return JsonResponse(json.loads(response.text))
+            
