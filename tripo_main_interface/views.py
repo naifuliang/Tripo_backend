@@ -117,7 +117,6 @@ class push_post_info(APIView):
     def post(self, request):
         user = request.user                                        # get post info from request body
         post_info = request.POST                                   
-        post_id = post_info.get('post_id')
         title = post_info.get('title')
         content = post_info.get('content')
         location = post_info.get('location')
@@ -128,8 +127,7 @@ class push_post_info(APIView):
         if post_check_item.exists():                               # if the post already exists
             return HttpResponse(status=403)                        # 403 forbidden
         else:                                                      # if not exist
-            post = Posts(post_id=post_id,\
-                            user=user,\
+            post = Posts(user=user,\
                                 title=title,\
                                     content=content,\
                                         time=time,\
