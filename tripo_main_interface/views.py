@@ -127,7 +127,7 @@ class push_post_info(APIView):
                                     content=content,\
                                         time=time,\
                                             location=location)     # create a new post
-            post.save()                                            # save the new post
+        post.save()                                            # save the new post
         return HttpResponse(status=200)                            # 200 OK
     
 
