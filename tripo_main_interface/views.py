@@ -58,7 +58,7 @@ class get_post_info(APIView):
             try:
                 post = Posts.objects.get(post_id=post_id)
             except Posts.DoesNotExist:
-                post = None
+                return HttpResponse(status=404)
         else:
             return HttpResponse(status=500)
         
