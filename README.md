@@ -41,10 +41,300 @@ python manage.py runserver
 - Mysql (ORM)
 - Nginx
 - Torch
+- POSTMAN
 
-## 文档
+## API文档
 
-如果你有详细的文档或在线帮助，提供链接。
+
+### Verification(验证码发送)
+
+* **Description**
+
+  * This API is used generate verification code and send to the user's email.
+  * The verification code applies to both register-time email verification and password reset.
+  * Note that a generated code is validated within 5 minutes, and can be used only once.
+  * Each email can request the verification code once a minute, if a new code is request, the older code will expire immediately even if it is generated with 5 minutes.
+
+* **Request**
+  * HTTP GET - Stateless, token is not required
+
+* **Respond**
+  * HTTP 403 - Request restricted, this is because you request the code too frequently (at most once a minute).
+  * HTTP 200 - Success, the code has been sent to the designated email
+
+* **Query Params**
+  * email：zhangyi_hu@foxmail.com
+
+
+
+### Register(注册)
+
+* **Description**
+
+  * This API is used to register a new account by a new email.
+
+* **Request**
+  * HTTP POST - Stateless, token is not required
+
+* **Respond**
+
+  * HTTP 200 - the emai has been registered successfully.
+  * HTTP 301 - the email had been registered.
+
+- **Body** **example**
+
+  {
+      "email": "zhangyi_hu@foxmail.com",
+      "code": "4424",
+      "username": "hzy",
+      "password": "hzy123"
+  }
+
+
+
+### Reset(密码重置)
+
+* **Description**
+
+  * This API is used to reset the certain account's password.
+  * PS: You need the verification code sent from our backend in 5 mins.
+
+* **Request**
+
+  * HTTP POST - Stateless, token is not required.
+
+* **Respond**
+
+  * HTTP 200 - Successfully reset the password.
+  * HTTP 404 - Fail to change a non-existent account's password.
+
+* **Body** **example**
+  * {
+        "email": "naifu.liang@foxmail.com",
+        "code": "5096",
+        "password": "12345"
+    }
+
+
+
+### Login(登录)
+
+* **Description**
+
+  * using username(regard it as emai) and password to login
+
+* **Bodyform-data**
+  * username：zhangyi_hu@foxmail.com
+  * password：hzy123
+
+
+
+### Refresh(刷新验证码)
+
+* **Description**
+
+  * Use fresh token to update the token when access token is expired
+
+* **Bodyform-data**
+
+  * refresh:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY5NjIyMzMyMiwiaWF0IjoxNjk0OTI3MzIyLCJqdGkiOiI5YzI0ODNlYWFiNmY0NzIzODllMDU1MTY3NGIzN2ZmZCIsInVzZXJfaWQiOjEsInVzZXJuYW1lIjoibmFpZnUyOTcifQ.YhChhg6C801G10-vHDHjK8n03xeDAMBAVaHpvGwS-mE
+
+    
+
+
+### get user info(获取用户信息)
+
+* **Description**
+   * This API is used to get a user's information.
+
+* **Request**
+  * HTTP GET - Stateful, token is required
+
+* **Respond**
+
+  * JsonResponse - Sucessfully get the user's information in the database.
+  * HTTP 404 - Fail to get the user's information according to the given uid.
+
+- **AuthorizationBearer Token**
+
+  * Token： eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY5NjIyMzMyMiwiaWF0IjoxNjk0OTI3MzIyLCJqdGkiOiI5YzI0ODNlYWFiNmY0NzIzODllMDU1MTY3NGIzN2ZmZCIsInVzZXJfaWQiOjEsInVzZXJuYW1lIjoibmFpZnUyOTcifQ.YhChhg6C801G10-vHDHjK8n03xeDAMBAVaHpvGwS-mE
+
+* **Query Params**
+
+  * uid：1
+
+
+
+### set  user info(设置用户信息)
+
+* **Description**
+
+  * This API is used to set a existing post.
+
+* **Request**
+
+  * HTTP POST - Stateful, token is required Respond.
+  * HTTP 200 - Success, the post has been updated.
+  * HTTP 404 - the post doesn't exist in the database.
+
+* **AuthorizationBearer Token**
+
+  * Token：
+
+    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY5NjIyMzMyMiwiaWF0IjoxNjk0OTI3MzIyLCJqdGkiOiI5YzI0ODNlYWFiNmY0NzIzODllMDU1MTY3NGIzN2ZmZCIsInVzZXJfaWQiOjEsInVzZXJuYW1lIjoibmFpZnUyOTcifQ.YhChhg6C801G10-vHDHjK8n03xeDAMBAVaHpvGwS-mE
+
+* **Bodyform-data**
+
+  * post_id: 1
+  * user: zhangi_hu@foxmail.com
+  * title: ssfd
+  * content: 6666666666666666666666666666
+  * time: 20:10:01
+  * local: Vanculvar
+
+
+
+### push post info
+
+* **Description**
+  * This API is used to upload a new post
+
+* **Request**
+  * HTTP POST - Stateful, token is required
+
+* **Respond**
+  - HTTP 200 - Success, the post has been stored in the database.
+
+* **AuthorizationBearer Token**
+
+  * Token：
+
+    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY5NjIyMzMyMiwiaWF0IjoxNjk0OTI3MzIyLCJqdGkiOiI5YzI0ODNlYWFiNmY0NzIzODllMDU1MTY3NGIzN2ZmZCIsInVzZXJfaWQiOjEsInVzZXJuYW1lIjoibmFpZnUyOTcifQ.YhChhg6C801G10-vHDHjK8n03xeDAMBAVaHpvGwS-mE
+
+* **Bodyform-data**
+  * uid: 1
+  * title: title
+  * content: content
+  * location: China
+  * time: 20:10:10
+
+
+
+### Get post info
+
+* **Description**
+  * This API is used to delete existing posts based on the post_id.
+
+* **Request**
+  * HTTP GET - Stateless, token is not required
+
+* **Respond**
+  - HTTP 404 - Request not found, you have failed to find the post you want because it doesn't exist in the database.
+  - JsonResponse - Success, the post has been found, return the post data.
+
+* **Query Params**
+  * post_id: 1
+
+
+
+### delete post info
+
+* **Description**
+  * This API is used to delete existing posts based on the post_id.
+
+* **Request**
+  * HTTP DELETE - Stateful, token is required
+
+* **Respond**
+
+  - HTTP 404 - Request not found, this is because you cannot delete a non-existent POST.
+
+  - HTTP 200 - Success, the post has been delete from the database.
+
+* AuthorizationBearer Token
+  * Token: <token>
+
+* Bodyform-data
+  * post_id: 1
+
+
+
+### AI_CHAT
+
+* Description
+  * This API is used to call the Baidu LLM interface to get introductory text based on a user-submitted object to be described (a location, landscape, or architectural term).
+
+* **Request**
+  * HTTP GET - Stateful, token is required
+
+* **Respond**
+
+  - HTTP 500 - Request not found.
+
+  - JsonResoponse - return the output from LLM sucessfully.
+
+* **AuthorizationBearer** **Token**
+  * Token: <token>
+
+* **Query** **Params**
+  * chat_info: 斯坦福大学
+
+
+
+
+
+### push img
+
+* **Description**
+  * This API is used to push a new img to the database.
+
+Noticing that your img must be bound to a existing post.
+
+* **Request**
+  * HTTP POST - Stateful, token is required
+
+* **Respond**
+
+  * HTTP 404 - Request not found, this is because you don't bind the img to a existing post.
+
+  - HTTP 200 - Success, the code has been sent to the designated email
+
+* **AuthorizationBearer** **Token**
+  * Token: <token>
+
+* Bodyform-data
+
+  * post_id: 1
+  * file_name: ACGN
+
+  * time: 20:10:2
+  * image: path of picture
+
+
+
+### delete img
+
+* Description
+
+  * This API is used to delete a existing img from the database by it's id.
+
+  * Notice that you cannot delete a img that doesn't exist in the database.
+
+* **Request**
+  * HTTP DELETE - Stateful, token is required
+
+* **Respond**
+
+  - HTTP 404 - Request not found, this is because you request deleting a img doesn't exist in the database.
+
+  - HTTP 200 - Success, the code has been sent to the designated email
+
+* **AuthorizationBearer** **Token**
+  * Token: <token>
+
+* Bodyform-data
+
+* img_id: 1
 
 ## 贡献
 
