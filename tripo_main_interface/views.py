@@ -23,7 +23,8 @@ class get_user_info(APIView):
             try:
                 user = Users.objects.get(id=uid)
             except Users.DoesNotExist:
-                user = None
+                # user = None
+                return HttpResponse(status=404)
         else:
             user = request.user
         res = {
