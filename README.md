@@ -194,7 +194,7 @@ python manage.py runserver
 
 
 
-### push post info
+### push post info(上传帖子)
 
 * **Description**
   * This API is used to upload a new post
@@ -220,7 +220,7 @@ python manage.py runserver
 
 
 
-### Get post info
+### Get post info(获得帖子信息)
 
 * **Description**
   * This API is used to delete existing posts based on the post_id.
@@ -237,7 +237,7 @@ python manage.py runserver
 
 
 
-### delete post info
+### delete post info(删除帖子)
 
 * **Description**
   * This API is used to delete existing posts based on the post_id.
@@ -259,7 +259,7 @@ python manage.py runserver
 
 
 
-### AI_CHAT
+### AI_CHAT(AI 介绍)
 
 * Description
   * This API is used to call the Baidu LLM interface to get introductory text based on a user-submitted object to be described (a location, landscape, or architectural term).
@@ -283,7 +283,7 @@ python manage.py runserver
 
 
 
-### push img
+### push img(上传图片)
 
 * **Description**
   * This API is used to push a new img to the database.
@@ -332,9 +332,9 @@ Noticing that your img must be bound to a existing post.
 * **AuthorizationBearer** **Token**
   * Token: <token>
 
-* Bodyform-data
+  * Bodyform-data
 
-* img_id: 1
+  * img_id: 1
 
 ## 贡献
 
