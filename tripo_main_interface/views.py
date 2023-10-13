@@ -160,7 +160,7 @@ class post_list(APIView):
     def get(self, request):
         up, down = int(request.GET['up']), int(request.GET['down'])
         if 'uid' in request.GET:
-            uid = request.GET['uid']
+            uid = int(request.GET['uid'])
             if uid != 0:
                 posts = Posts.objects.filter(user__id=uid).order_by('-time')[up: down]
             else:
@@ -168,7 +168,7 @@ class post_list(APIView):
         else:
             user = request.user
             posts = Posts.objects.filter(user=user).order_by('-time')[up: down]
-        res = []
+        posts_list = []
         for post in posts:
             images = image_item.objects.filter(post=post)
             image_urls = [image.image.url for image in images]
@@ -183,8 +183,13 @@ class post_list(APIView):
                 "location": post.location,
                 "images": image_urls
             }
-            res.append(post_info)
-        return JsonResponse(res, safe=False)
+            posts_list.append(post_info)
+
+        res = {
+            "count": len(posts),
+            "posts": posts_list
+        }
+        return JsonResponse(res)
 
 # get the AI LLM chat response from baidu company
 class get_chat_response(APIView):
