@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-q+_p_$snr3^=**6am6!t75+3t99d2s@=-isvxrvu75c+@5zfq0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['tripo.ilnf.space']
 
 # Application definition
 
@@ -68,6 +68,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                'django.template.context_processors.media',
+
             ],
         },
     },
