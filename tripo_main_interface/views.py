@@ -144,15 +144,13 @@ class delete_post(APIView):
     def delete(self, request):
         # get post info and user info from request body
         user = request.user
-        post_info = request.POST                    
-        post_id = post_info.get('post_id')
-        post = Posts.objects.filter(post_id=post_id, user=user)
-        
-        if post.exists():                            # if the post already exists
-            post.delete()                            # delete the post
-            return HttpResponse(status=200)          # return HTTP 200
-        else:                                        # if not exists
-           return HttpResponse(status=404)           # return HTTP 404
+        post_id = request.GET['post_id']
+        try:
+            post = Posts.objects.get(post_id=post_id, user=user)
+        except Posts.DoesNotExist:
+            return HttpResponse(status=404)
+        post.delete()
+        return HttpResponse(status=200)
         
 
 # get the AI LLM chat response from baidu company
