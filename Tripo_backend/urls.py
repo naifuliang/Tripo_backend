@@ -42,6 +42,7 @@ urlpatterns = [
     path('publish/', main_views.publish_post.as_view(), name='push_post_info'),
     path('modify_post/', main_views.modify_post.as_view(), name='set_post_info'),
     path('delete_post/', main_views.delete_post.as_view(), name='delete_post_info'),
+    path('post_list/', main_views.post_list.as_view(), name='post_list'),
     path('get_chat_response/', main_views.get_chat_response.as_view(), name='get_chat_response'),
     path('push_img/', img_views.push_img.as_view(), name='push_img'),
     path('delete_img/', img_views.delete_img.as_view(), name='delete_img'),

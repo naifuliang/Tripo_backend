@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import authentication, permissions
 from django.http import HttpResponse, JsonResponse
+from django.db.models import Q
 from tripo_main_interface.models import Users, Posts
 from image_manager.models import image_item
 from django.contrib.auth.models import AnonymousUser
@@ -74,7 +75,10 @@ class publish_post(APIView):
         post = Posts.objects.create(user=user, title=title, content=content, time=timezone.now(), location=location)
         for image in files:
             image_item.objects.create(post=post, image=image)
-        return HttpResponse(status=200)
+        res = {
+            "post_id": post.post_id
+        }
+        return JsonResponse(res)
 
 
 class get_post(APIView):
@@ -151,7 +155,36 @@ class delete_post(APIView):
             return HttpResponse(status=404)
         post.delete()
         return HttpResponse(status=200)
-        
+
+class post_list(APIView):
+    def get(self, request):
+        up, down = int(request.GET['up']), int(request.GET['down'])
+        if 'uid' in request.GET:
+            uid = request.GET['uid']
+            if uid != 0:
+                posts = Posts.objects.filter(user__id=uid).order_by('-time')[up: down]
+            else:
+                posts = Posts.objects.all().order_by('-time')[up: down]
+        else:
+            user = request.user
+            posts = Posts.objects.filter(user=user).order_by('-time')[up: down]
+        res = []
+        for post in posts:
+            images = image_item.objects.filter(post=post)
+            image_urls = [image.image.url for image in images]
+            post_info = {
+                "post_id": post.post_id,
+                "username": post.user.username,
+                "email": post.user.email,
+                "avatar": post.user.avatar.url if post.user.avatar else None,
+                "title": post.title,
+                "content": post.content,
+                "time": post.time,
+                "location": post.location,
+                "images": image_urls
+            }
+            res.append(post_info)
+        return JsonResponse(res, safe=False)
 
 # get the AI LLM chat response from baidu company
 class get_chat_response(APIView):
