@@ -21,9 +21,14 @@ from authorization import views as auth_views
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 from tripo_main_interface import views as main_views
 from image_manager import views as img_views
+from django.views.static import serve
+from . import settings
+
+from django.conf.urls.static import static
 
 urlpatterns = [
     #    path("admin/", admin.site.urls),
+    path(r'media/(?P<path>.*)', serve,{'document_root': settings.MEDIA_ROOT}),
     path("verification/", auth_views.verification.as_view(), name='verification'),
     path("register/", auth_views.register.as_view(), name='register'),
     path("reset/", auth_views.reset.as_view(), name='reset'),
@@ -32,11 +37,12 @@ urlpatterns = [
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('get_user_info/', main_views.get_user_info.as_view(), name='get_user_info'),
     path('set_user_info/', main_views.set_user_info.as_view(), name='set_user_info'),
-    path('get_post_info/', main_views.get_post_info.as_view(), name='get_post_info'),
-    path('push_post_info/', main_views.push_post_info.as_view(), name='push_post_info'),
-    path('set_post_info/', main_views.set_post_info.as_view(), name='set_post_info'),
-    path('delete_post_info/', main_views.delete_post_info.as_view(), name='delete_post_info'),
+    path('upload_avatar/', main_views.upload_user_avatar.as_view(), name='upload_avatar'),
+    path('get_post/', main_views.get_post.as_view(), name='get_post_info'),
+    path('publish/', main_views.publish_post.as_view(), name='push_post_info'),
+    path('modify_post/', main_views.modify_post.as_view(), name='set_post_info'),
+    path('delete_post/', main_views.delete_post.as_view(), name='delete_post_info'),
     path('get_chat_response/', main_views.get_chat_response.as_view(), name='get_chat_response'),
     path('push_img/', img_views.push_img.as_view(), name='push_img'),
     path('delete_img/', img_views.delete_img.as_view(), name='delete_img'),
-]
+]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

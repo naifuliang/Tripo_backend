@@ -11,7 +11,7 @@ class Users(AbstractUser):
     username = models.TextField(default='unnamed user')     # username
     password = models.TextField(default='')     # password, ought to be encrypted in front end
     email = models.TextField(default='')    # email, format should be checked before stored
-    avatar = models.ImageField(upload_to='avatars', default=None)   # user avatar, use supported format
+    avatar = models.ImageField(upload_to='avatars', default='../media/static/default_avatar.jpg')   # user avatar, use supported format
     # posts, foreign key related name
 
 class Posts(models.Model):
