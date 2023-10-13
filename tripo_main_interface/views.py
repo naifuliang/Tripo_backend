@@ -12,6 +12,7 @@ from tripo_main_interface.models import Users, Posts
 from image_manager.models import image_item
 from django.contrib.auth.models import AnonymousUser
 from .utils import get_access_token
+from django.utils import timezone
 import requests
 # Create your views here.
 
@@ -42,11 +43,11 @@ class set_user_info(APIView):
         user = request.user
         user_info = json.loads(request.body)
         username = user_info.get('username')
-        email = user_info.get('email')
+        # email = user_info.get('email')
         if username is not None:
             user.username = username
-        if email is not None:
-            user.email = email
+        # if email is not None:
+        #     user.email = email
         user.save()
         return HttpResponse(status=200)
 
@@ -58,8 +59,24 @@ class upload_user_avatar(APIView):
         user.avatar = avatar
         user.save()
         return HttpResponse(status=200)
-    
-# get an existing post from the database
+
+
+
+class publish_post(APIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request):
+        user = request.user                                        # get post info from request body
+        title = request.POST['title']
+        content = request.POST['content']
+        location = request.POST['location']
+        files = request.FILES.getlist('images')
+        # for image in files:
+        post = Posts.objects.create(user=user, title=title, content=content, time=timezone.now(), location=location)
+        for image in files:
+            image_item.objects.create(post=post, image=image)
+        return HttpResponse(status=200)
+
+
 class get_post(APIView):
     def get(self, request):
         # get the post in the database 
@@ -73,9 +90,7 @@ class get_post(APIView):
             return HttpResponse(status=500)
 
         images = image_item.objects.filter(post=post)
-        image_urls = []
-        for image in images:
-            image_urls.append(image.image.url)
+        image_urls = [image.image.url for image in images]
         # return the post information from database
         res = {
             "post_id": post.post_id,
@@ -122,20 +137,6 @@ class modify_post(APIView):
         post.save()                                  # save the new post
         return HttpResponse(status=200)              # 200 OK
     
-# add a new post to the database
-class publish_post(APIView):
-    permission_classes = (IsAuthenticated,)
-    def post(self, request):
-        user = request.user                                        # get post info from request body
-        post_info = json.loads(request.body)
-        title = post_info.get('title')
-        content = post_info.get('content')
-        time = post_info.get('time')
-        location = post_info.get('location')
-        post = Posts(user=user, title=title, content=content, time=time, location=location)     # create a new post
-        post.save()                                            # save the new post
-        return HttpResponse(status=200)                            # 200 OK
-    
 
 # delete an existing post from the database
 class delete_post(APIView):
@@ -145,7 +146,7 @@ class delete_post(APIView):
         user = request.user
         post_info = request.POST                    
         post_id = post_info.get('post_id')
-        post = Posts.objects.filter(post_id=post_id,user=user) 
+        post = Posts.objects.filter(post_id=post_id, user=user)
         
         if post.exists():                            # if the post already exists
             post.delete()                            # delete the post
