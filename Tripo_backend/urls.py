@@ -40,6 +40,7 @@ urlpatterns = [
     path('upload_avatar/', main_views.upload_user_avatar.as_view(), name='upload_avatar'),
     path('get_post/', main_views.get_post.as_view(), name='get_post'),
     path('publish/', main_views.publish_post.as_view(), name='push_post_info'),
+    path('upload_images/', main_views.upload_images.as_view(), name='upload_images'),
     path('modify_post/', main_views.modify_post.as_view(), name='set_post_info'),
     path('delete_post/', main_views.delete_post.as_view(), name='delete_post_info'),
     path('post_list/', main_views.post_list.as_view(), name='post_list'),

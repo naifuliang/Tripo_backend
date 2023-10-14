@@ -70,16 +70,26 @@ class publish_post(APIView):
         title = request.POST['title']
         content = request.POST['content']
         location = request.POST['location']
-        files = request.FILES.getlist('images')
         # for image in files:
         post = Posts.objects.create(user=user, title=title, content=content, time=timezone.now(), location=location)
-        for image in files:
-            image_item.objects.create(post=post, image=image)
         res = {
             "post_id": post.post_id
         }
         return JsonResponse(res)
 
+class upload_images(APIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request):
+        user = request.user
+        post_id = request.GET['post_id']
+        try:
+            post = Posts.objects.get(Q(user=user) & Q(post_id=post_id))
+        except Posts.DoesNotExist:
+            return HttpResponse(status=404)
+        files = request.FILES.getlist('images')
+        for image in files:
+            image_item.objects.create(post=post, image=image)
+        return HttpResponse(status=200)
 
 class get_post(APIView):
     def get(self, request):
