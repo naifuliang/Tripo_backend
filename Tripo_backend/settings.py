@@ -100,6 +100,10 @@ DATABASES = {
         'PORT': 3306, # 端口
         'USER': 'Tripo',  # 数据库用户名
         'PASSWORD': '123456', # 数据库密码
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+            'use_unicode': True,
+        },
     }
 }
 
