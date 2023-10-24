@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework import authentication, permissions
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Q
-from tripo_main_interface.models import Users, Posts
+from tripo_main_interface.models import Users, Posts, Message
 from image_manager.models import image_item
 from django.contrib.auth.models import AnonymousUser
 from .utils import get_access_token
@@ -201,7 +201,76 @@ class post_list(APIView):
         }
         return JsonResponse(res)
 
-# get the AI LLM chat response from baidu company
+class like(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self, request):
+        user = request.user
+        post_id = request.GET['post_id']
+        try:
+            post = Posts.objects.get(post_id=post_id)
+        except Posts.DoesNotExist:
+            return HttpResponse(status=404)
+        like_list = post.like
+        if user.id in like_list['user']:
+            return HttpResponse(status=403)
+        like_list['user'].append(user.id)
+        like_list['number'] += 1
+        post.like = like_list
+        post.save()
+        content = "%s just liked your post %s" % (user.username, post.title)
+        Message.objects.create(user=post.user, time=timezone.now(), content=content, post_id=post.post_id)
+        return HttpResponse(status=200)
+
+class comment(APIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request):
+        user = request.user
+        comment_info = json.loads(request.body)
+        post_id = comment_info.get('post_id')
+        content = comment_info.get('content')
+        try:
+            post = Posts.objects.get(post_id=post_id)
+        except Posts.DoesNotExist:
+            return HttpResponse(status=404)
+        comment_list = post.comment
+        comment_list['number'] += 1
+        comment_id = comment_list['number']
+        comment_list['content'].append(
+            {
+                "user": user.id,
+                "content": content,
+                "time": timezone.datetime.now(),
+                "comment_id": comment_id
+            }
+        )
+        post.comment = comment_list
+        post.save()
+        content = "%s just commented your post %s" % (user.username, post.title)
+        Message.objects.create(user=post.user, time=timezone.now(), content=content, post_id=post.post_id, comment_id=comment_id)
+        return HttpResponse(status=200)
+
+class get_message(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self, request):
+        user = request.user
+        messages = Message.objects.all(user=user)
+        message_list = []
+        for message in messages:
+            image = image_item.objects.filter(post__message=message).first()
+            message_list.append({
+                "time": message.time,
+                "content": message.content,
+                "image": image.image.url,
+                "post_id": message.post.post_id,
+                "comment_id": message.comment_id
+            })
+        res = {
+            "number": len(message_list),
+            "content": message_list
+        }
+        return JsonResponse(res)
+
+        # get the AI LLM chat response from baidu company
 class get_chat_response(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request):

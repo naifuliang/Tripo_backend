@@ -21,4 +21,13 @@ class Posts(models.Model):
     content = models.TextField(default='')  # content of the post
     time = models.DateTimeField(default=timezone.now)   # post time, local time
     location = models.TextField(default='')     # location, generated & resolved in front end
+    like = models.JSONField(default=dict(number=0, user=[]))
+    comment = models.JSONField(default=dict(number=0, content=[]))
     # images, foreign key related name
+
+class Message(models.Model):
+    user = models.ForeignKey('Users', on_delete=models.CASCADE, related_name='message')     # user
+    time = models.DateTimeField(default=timezone.now)   # time
+    content = models.TextField(default='')  # content
+    post = models.ForeignKey('Posts', on_delete=models.SET_NULL, null=True, related_name='message')     # post
+    comment_id = models.IntegerField(blank=True, null=True, default=None)
