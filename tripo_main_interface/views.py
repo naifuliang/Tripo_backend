@@ -249,6 +249,23 @@ class comment(APIView):
         Message.objects.create(user=post.user, time=timezone.now(), content=content, post_id=post.post_id, comment_id=comment_id)
         return HttpResponse(status=200)
 
+class nearby(APIView):
+    def get(self, request):
+        longitude = request.GET['longitude']
+        latitude = request.GET['latitude']
+        posts = Posts.objects.all()
+        post_ids = []
+        for post in posts:
+            location = post.location
+            text, post_longitude, post_latitude = location.split(' ')
+            distance = (post_latitude - latitude) ** 2 + (post_longitude - longitude) ** 2
+            if distance <= 0.01:
+                post_ids.append(post.post_id)
+        res = {
+            "post_id": post_ids
+        }
+        return JsonResponse(res)
+
 class get_message(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request):

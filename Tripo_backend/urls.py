@@ -47,6 +47,7 @@ urlpatterns = [
     path('like/', main_views.like.as_view(), name='like'),
     path('comment/', main_views.comment.as_view(), name='comment'),
     path('message/', main_views.get_message.as_view(), name='message'),
+    path('nearby/', main_views.nearby.as_view(), name='nearby'),
     path('get_chat_response/', main_views.get_chat_response.as_view(), name='get_chat_response'),
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
