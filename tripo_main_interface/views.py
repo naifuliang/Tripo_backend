@@ -270,7 +270,7 @@ class get_message(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request):
         user = request.user
-        messages = Message.objects.all(user=user)
+        messages = Message.objects.filter(user=user)
         message_list = []
         for message in messages:
             image = image_item.objects.filter(post__message=message).first()
