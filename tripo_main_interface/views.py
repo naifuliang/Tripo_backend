@@ -211,6 +211,21 @@ class like(APIView):
         except Posts.DoesNotExist:
             return HttpResponse(status=404)
         like_list = post.like
+        liked = True if user.id in like_list['user'] else False
+        number_liked = like_list['number']
+        res = {
+            "liked": liked,
+            "number_liked": number_liked
+        }
+        return JsonResponse(res)
+    def post(self, request):
+        user = request.user
+        post_id = json.loads(request.body).get('post_id')
+        try:
+            post = Posts.objects.get(post_id=post_id)
+        except Posts.DoesNotExist:
+            return HttpResponse(status=404)
+        like_list = post.like
         if user.id in like_list['user']:
             return HttpResponse(status=403)
         like_list['user'].append(user.id)
@@ -218,6 +233,23 @@ class like(APIView):
         post.like = like_list
         post.save()
         content = "%s just liked your post %s" % (user.username, post.title)
+        Message.objects.create(user=post.user, time=timezone.now(), content=content, post_id=post.post_id)
+        return HttpResponse(status=200)
+    def delete(self, request):
+        user = request.user
+        post_id = json.loads(request.body).get('post_id')
+        try:
+            post = Posts.objects.get(post_id=post_id)
+        except Posts.DoesNotExist:
+            return HttpResponse(status=404)
+        like_list = post.like
+        if user.id not in like_list['user']:
+            return HttpResponse(status=403)
+        like_list['user'].remove(user.id)
+        like_list['number'] -= 1
+        post.like = like_list
+        post.save()
+        content = "%s just cancelled the like of your post %s" % (user.username, post.title)
         Message.objects.create(user=post.user, time=timezone.now(), content=content, post_id=post.post_id)
         return HttpResponse(status=200)
 
