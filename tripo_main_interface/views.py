@@ -271,7 +271,7 @@ class comment(APIView):
             {
                 "user": user.id,
                 "content": content,
-                "time": timezone.datetime.now(),
+                "time": str(timezone.datetime.now()),
                 "comment_id": comment_id
             }
         )
