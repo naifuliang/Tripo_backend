@@ -115,7 +115,8 @@ class get_post(APIView):
             "content": post.content, 
             "time": post.time,
             "location": post.location,
-            "images": image_urls
+            "images": image_urls,
+            "comments": post.comment
         }
         return JsonResponse(res)
 
@@ -287,9 +288,11 @@ class nearby(APIView):
         latitude = request.GET['latitude']
         posts = Posts.objects.all()
         post_ids = []
+        longitude, latitude = float(longitude), float(latitude)
         for post in posts:
             location = post.location
             text, post_longitude, post_latitude = location.split(' ')
+            post_longitude, post_latitude = float(post_longitude), float(post_latitude)
             distance = (post_latitude - latitude) ** 2 + (post_longitude - longitude) ** 2
             if distance <= 0.01:
                 post_ids.append(post.post_id)
