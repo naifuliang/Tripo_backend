@@ -108,6 +108,7 @@ class get_post(APIView):
         # return the post information from database
         res = {
             "post_id": post.post_id,
+            "uid": post.user.id,
             "username": post.user.username,
             "email": post.user.email,
             "avatar": post.user.avatar.url if post.user.avatar else None,
@@ -185,6 +186,7 @@ class post_list(APIView):
             image_urls = [image.image.url for image in images]
             post_info = {
                 "post_id": post.post_id,
+                "uid": post.user.id,
                 "username": post.user.username,
                 "email": post.user.email,
                 "avatar": post.user.avatar.url if post.user.avatar else None,
