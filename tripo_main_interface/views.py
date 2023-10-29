@@ -324,23 +324,30 @@ class get_message(APIView):
         }
         return JsonResponse(res)
 
-        # get the AI LLM chat response from baidu company
+# get the AI LLM chat response from baidu company
 class get_chat_response(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request):
-        # get the chat info from request
-        chat_query = request.GET.get('chat_info')   # 输入需要LLM大模型处理的介绍内容，比如某海滩某山脉的名字
+        # get the chat info from post_id in request
+        post_id = request.GET.get('post_id') 
+        location = Posts.objects.filter(post_id=post_id).first().location
         
-        if chat_query is None:
+        # for debug
+        # print(location)
+        # print(post_id)
+        # print(chat_query)
+        
+        if post_id is None:
             return HttpResponse(status=500)
         
+        # return HttpResponse(status=200)
         url = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/eb-instant?access_token=" + get_access_token() # get the access token from baidu company
 
         payload = json.dumps({
             "messages": [
                 {
                     "role": "user",
-                    "content": "假设你是一名资深导游，请为游客们简要介绍一下{}".format(chat_query)
+                    "content": "假设你是一名资深导游，请为游客们简要介绍一下{}".format(location)
                 }
             ]
         })
@@ -350,6 +357,5 @@ class get_chat_response(APIView):
         }
         
         response = requests.request("POST", url, headers=headers, data=payload)
-        
-        return JsonResponse(json.loads(response.text))
+        return JsonResponse({'result':json.loads(response.text)['result']})
             
