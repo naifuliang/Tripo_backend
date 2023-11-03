@@ -10,11 +10,14 @@ from rest_framework import authentication, permissions
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Q
 from tripo_main_interface.models import Users, Posts, Message
-from image_manager.models import image_item
+from image_manager.models import image_item,word_cloud_item
 from django.contrib.auth.models import AnonymousUser
-from .utils import get_access_token
+from .utils import get_access_token,get_word_cloud
 from django.utils import timezone
 import requests
+from PIL import Image, ImageDraw, ImageFont  
+import tempfile  
+from django.core.files.uploadedfile import SimpleUploadedFile  
 # Create your views here.
 
 class get_user_info(APIView):
@@ -330,8 +333,7 @@ class get_chat_response(APIView):
     def get(self, request):
         # get the chat info from post_id in request
         post_id = request.GET.get('post_id') 
-        location = Posts.objects.filter(post_id=post_id).first().location
-        
+        location = Posts.objects.filter(post_id=post_id).first().location.split(' ')[0]
         # for debug
         # print(location)
         # print(post_id)
@@ -340,14 +342,16 @@ class get_chat_response(APIView):
         if post_id is None:
             return HttpResponse(status=500)
         
+        # print(location)
         # return HttpResponse(status=200)
+    
         url = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/eb-instant?access_token=" + get_access_token() # get the access token from baidu company
 
         payload = json.dumps({
             "messages": [
                 {
                     "role": "user",
-                    "content": "假设你是一名资深导游，请为游客们简要介绍一下{}".format(location)
+                    "content": "假设你是一名资深导游，请为游客们用一段话简单的介绍一下{}附近最有名的景点.直接介绍，不要说“让我为您介绍”，“好的，游客们”以及后面的不必要的话或者有相同意思的话，直接介绍景点。".format(location, location)
                 }
             ]
         })
@@ -358,4 +362,68 @@ class get_chat_response(APIView):
         
         response = requests.request("POST", url, headers=headers, data=payload)
         return JsonResponse({'result':json.loads(response.text)['result']})
+            
+
+# AI conclusin + word cloud + image selection from whole personal posts
+class AI_conclusion(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self, request):
+        
+        # get the user's id
+        user_id = request.GET.get('user_id') 
+        
+        # get the post info of somebody from database according to the user_id
+        post_list = Posts.objects.filter(user__id=user_id)
+        
+        # get images of posts from database according to the user_id
+        image_list = []
+        
+        # get locaiton information from posts
+        location_list = []
+        
+        for i in range(len(post_list)):
+            image_list += [image.image.url for image in image_item.objects.filter(post=post_list[i])]
+            location_list += [post_list[i].location.split(' ')[0]]
+
+        # if cannot figure out a available user_id return status 500
+        if user_id is None:
+            return HttpResponse(status=500)
+
+        # generate AI conclusion from baidu company
+        url = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/eb-instant?access_token=" + get_access_token() # get the access token from baidu company
+        payload = json.dumps({
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "用户的旅行生涯中去了{}旅游，请根据用户去过的地方生成一份总结旅游生涯的高质量散文，并在最后给出用户旅游偏好的分析。语言不要那么朴实，不要流水账，不要以“我”为人称，只允许以“您”为人称，不要在最前面说“标题：”也不要起标题。".format(','.join(location_list))
+                }
+            ]
+        })
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        response = requests.request("POST", url, headers=headers, data=payload)
+        text = json.loads(response.text)['result'].replace('\n','')
+        
+        # generate word cloud from conclusion
+        word_cloud = get_word_cloud(text)
+        word_cloud_image = word_cloud.to_image()
+        
+        # create model instance and save word cloud image
+        temp_image = tempfile.NamedTemporaryFile(suffix='.png', delete=False)  
+        word_cloud_image.save(temp_image, 'PNG')  
+        temp_image_path = temp_image.name
+        if not word_cloud_item.objects.filter(id=user_id).exists():
+            my_model_instance = word_cloud_item.objects.create(id=user_id, image=None)
+        else:
+            my_model_instance = word_cloud_item.objects.get(id=user_id)
+            with open(temp_image_path, 'rb') as file:  
+                my_model_instance.image.save(f'{user_id}_word_cloud.png', SimpleUploadedFile(temp_image.name,file.read(), content_type='image/png'))   
+            my_model_instance.save()
+    
+        # return text, image_list, location_list and word cloud image
+        return JsonResponse({'result':text,
+                             'image_list':image_list,
+                             'location_list':location_list,
+                             'word_cloud':my_model_instance.image.url})
             

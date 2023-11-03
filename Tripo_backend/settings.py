@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-q+_p_$snr3^=**6am6!t75+3t99d2s@=-isvxrvu75c+@5zfq0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['tripo.ilnf.space']
+ALLOWED_HOSTS = ['tripo.ilnf.space','localhost']
 
 # Application definition
 

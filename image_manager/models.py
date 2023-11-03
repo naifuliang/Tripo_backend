@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+
 # Create your models here.
 
 class image_item(models.Model):
@@ -13,3 +14,9 @@ class image_item(models.Model):
 
     # def __str__(self):
     #     return str(self.file_name)
+
+class word_cloud_item(models.Model):
+    id = models.AutoField(primary_key=True, verbose_name='id')  # primary key
+    image = models.ImageField(upload_to='word_cloud')     # posted images
+    def __unicode__(self):  # __str__ on Python 3
+        return (self.id, self.image)
