@@ -370,7 +370,16 @@ class AI_conclusion(APIView):
     def get(self, request):
         
         # get the user's id
-        user_id = request.GET.get('user_id') 
+        # user_id = request.GET.get('user_id') 
+        # if 'user_id' in request.GET:
+        #     user_id = request.GET['user_id']
+        #     try:
+        #         user = Users.objects.get(id=user_id)
+        #     except Users.DoesNotExist:
+        #         # user = None
+        #         return HttpResponse(status=404)
+        # else:
+        user_id = request.user.id
         
         # get the post info of somebody from database according to the user_id
         post_list = Posts.objects.filter(user__id=user_id)
