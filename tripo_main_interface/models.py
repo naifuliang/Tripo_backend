@@ -14,6 +14,10 @@ class Users(AbstractUser):
     avatar = models.ImageField(upload_to='avatars', default='../media/static/default_avatar.jpg')   # user avatar, use supported format
     # posts, foreign key related name
 
+class Tags(models.Model):
+    tag_name = models.TextField()
+    citation = models.IntegerField(default=1)
+
 class Posts(models.Model):
     post_id = models.AutoField(primary_key=True)    # primary key
     user = models.ForeignKey('Users', on_delete=models.CASCADE, related_name='posts')   # user who posts
@@ -23,6 +27,7 @@ class Posts(models.Model):
     location = models.TextField(default='')     # location, generated & resolved in front end
     like = models.JSONField(default=dict(number=0, user=[]))
     comment = models.JSONField(default=dict(number=0, content=[]))
+    tags = models.ManyToManyField(Tags)
     # images, foreign key related name
 
 class Message(models.Model):

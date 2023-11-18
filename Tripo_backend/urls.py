@@ -50,5 +50,7 @@ urlpatterns = [
     path('nearby/', main_views.nearby.as_view(), name='nearby'),
     path('get_chat_response/', main_views.get_chat_response.as_view(), name='get_chat_response'),
     path('AI_conclusion/', main_views.AI_conclusion.as_view(), name='AI_conclusion'),
+    path('get_tags', main_views.get_tags.as_view(), name='get_tags'),
+
     
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

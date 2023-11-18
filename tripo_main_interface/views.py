@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework import authentication, permissions
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Q
-from tripo_main_interface.models import Users, Posts, Message
+from tripo_main_interface.models import Users, Posts, Message, Tags
 from image_manager.models import image_item,word_cloud_item
 from django.contrib.auth.models import AnonymousUser
 from .utils import get_access_token,get_word_cloud
@@ -73,8 +73,18 @@ class publish_post(APIView):
         title = request.POST['title']
         content = request.POST['content']
         location = request.POST['location']
+        tags = request.POST['tags']
+        tags = json.loads(tags)
         # for image in files:
         post = Posts.objects.create(user=user, title=title, content=content, time=timezone.now(), location=location)
+        for tag in tags:
+            try:
+                tag_rec = Tags.objects.get(tag_name=tag)
+                tag_rec.citation += 1
+                tag_rec.save()
+            except Tags.DoesNotExist:
+                tag_rec = Tags.objects.create(tag_name=tag)
+            post.tags.add(tag_rec)
         res = {
             "post_id": post.post_id
         }
@@ -168,12 +178,19 @@ class delete_post(APIView):
             post = Posts.objects.get(post_id=post_id, user=user)
         except Posts.DoesNotExist:
             return HttpResponse(status=404)
+        tags = post.tags
+        for tag in tags:
+            tag.citation -= 1
+            tag.save()
+            if tag.citation == 0:
+                tag.delete()
         post.delete()
         return HttpResponse(status=200)
 
 class post_list(APIView):
     def get(self, request):
         up, down = int(request.GET['up']), int(request.GET['down'])
+        tag_name = request.GET['tag'] if 'tag' in request.GET else None
         if 'uid' in request.GET:
             uid = int(request.GET['uid'])
             if uid != 0:
@@ -185,6 +202,10 @@ class post_list(APIView):
             posts = Posts.objects.filter(user=user).order_by('-time')[up: down]
         posts_list = []
         for post in posts:
+            if tag_name:
+                tags = [tag.tag_name for tag in post.tags]
+                if tag_name not in tags:
+                    continue
             images = image_item.objects.filter(post=post)
             image_urls = [image.image.url for image in images]
             post_info = {
@@ -436,3 +457,15 @@ class AI_conclusion(APIView):
                              'location_list':location_list,
                              'word_cloud':my_model_instance.image.url})
             
+
+class get_tags(APIView):
+    def get(self, request):
+        tags = Tags.objects.all()
+        tags = [tag.tag_name for tag in tags]
+        res = {
+            "tags": tags
+        }
+        return JsonResponse(res)
+
+#class generate_tags(APIView):
+    # generate tags-to-select according to the time, location and title, content sent by the front end
