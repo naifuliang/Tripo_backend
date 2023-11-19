@@ -476,10 +476,14 @@ class generate_tags(APIView):
         title = request.GET['title']
         content = request.GET['content']
         materials = [location, title, content]
-        tags = tag_extractor(materials)
+        # 整数到月份映射表
+        map_table = {1:'Jan', 2:'Feb', 3:'Mar', 4:'Apr', 5:'May', 6:'Jun',
+                     7:'Jul', 8:'Aug', 9:'Sep', 10:'Oct', 11:'Nov', 12:'Dec'}
+
+        tags = list(tag_extractor(materials)) +[map_table[int(time.split('-')[1])]]
         # if cannot figure out a available user_id return status 500
-        # if time is None and location is None and title is None and content is None:
-        #     return HttpResponse(status=500)
+        if time is None and location is None and title is None and content is None:
+            return HttpResponse(status=500)
         
         return JsonResponse(safe=False,data=list(tags))
 
