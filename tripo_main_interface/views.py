@@ -202,11 +202,13 @@ class post_list(APIView):
             user = request.user
             posts = Posts.objects.filter(user=user).order_by('-time')[up: down]
         posts_list = []
+        count = 0
         for post in posts:
             if tag_name:
-                tags = [tag.tag_name for tag in post.tags]
+                tags = [tag.tag_name for tag in post.tags.all()]
                 if tag_name not in tags:
                     continue
+            count += 1
             images = image_item.objects.filter(post=post)
             image_urls = [image.image.url for image in images]
             post_info = {
@@ -224,7 +226,7 @@ class post_list(APIView):
             posts_list.append(post_info)
 
         res = {
-            "count": len(posts),
+            "count": count,
             "posts": posts_list
         }
         return JsonResponse(res)
