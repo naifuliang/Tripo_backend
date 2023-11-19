@@ -477,8 +477,8 @@ class generate_tags(APIView):
         content = request.GET['content']
         materials = [location, title, content]
         # 整数到月份映射表
-        map_table = {1:'Jan', 2:'Feb', 3:'Mar', 4:'Apr', 5:'May', 6:'Jun',
-                     7:'Jul', 8:'Aug', 9:'Sep', 10:'Oct', 11:'Nov', 12:'Dec'}
+        map_table = {1:'January', 2:'February', 3:'March', 4:'April', 5:'May', 6:'June',
+                     7:'July', 8:'August', 9:'September', 10:'October', 11:'November', 12:'December'}
 
         tags = list(tag_extractor(materials)) +[map_table[int(time.split('-')[1])]]
         # if cannot figure out a available user_id return status 500
