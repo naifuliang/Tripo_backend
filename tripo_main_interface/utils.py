@@ -6,6 +6,23 @@ from collections import Counter
 from wordcloud import WordCloud  
 import matplotlib.pyplot as plt  
 import os
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+def tag_extractor(corpus:list[str]):
+    # vectorizer = TfidfVectorizer()
+    # X = vectorizer.fit_transform(corpus)
+    # keywords = vectorizer.get_feature_names()
+    # print(keywords)
+    # 文本数据
+
+
+    # 创建TF-IDF向量化器
+    tfidf_vectorizer = TfidfVectorizer()
+    # # 对文本数据进行TF-IDF向量化
+    tfidf_matrix = tfidf_vectorizer.fit_transform(corpus)
+    # 获取特征词汇表
+    feature_names = tfidf_vectorizer.get_feature_names_out()
+    return feature_names
 
 def get_word_cloud(text):
     # 给定的文段  

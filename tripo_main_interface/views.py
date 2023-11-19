@@ -12,12 +12,13 @@ from django.db.models import Q
 from tripo_main_interface.models import Users, Posts, Message, Tags
 from image_manager.models import image_item,word_cloud_item
 from django.contrib.auth.models import AnonymousUser
-from .utils import get_access_token,get_word_cloud
+from .utils import get_access_token,get_word_cloud,tag_extractor
 from django.utils import timezone
 import requests
 from PIL import Image, ImageDraw, ImageFont  
 import tempfile  
 from django.core.files.uploadedfile import SimpleUploadedFile  
+
 # Create your views here.
 
 class get_user_info(APIView):
@@ -467,5 +468,22 @@ class get_tags(APIView):
         }
         return JsonResponse(res)
 
-#class generate_tags(APIView):
+class generate_tags(APIView):
     # generate tags-to-select according to the time, location and title, content sent by the front end
+    def get(self, request):
+        time = request.GET['time']
+        location = request.GET['location'].split(' ')[0]
+        title = request.GET['title']
+        content = request.GET['content']
+        materials = [location, title, content]
+        # 整数到月份映射表
+        map_table = {1:'Jan', 2:'Feb', 3:'Mar', 4:'Apr', 5:'May', 6:'Jun',
+                     7:'Jul', 8:'Aug', 9:'Sep', 10:'Oct', 11:'Nov', 12:'Dec'}
+
+        tags = list(tag_extractor(materials)) +[map_table[int(time.split('-')[1])]]
+        # if cannot figure out a available user_id return status 500
+        if time is None and location is None and title is None and content is None:
+            return HttpResponse(status=500)
+        
+        return JsonResponse(safe=False,data=list(tags))
+
